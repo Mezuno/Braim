@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('animals', function (Blueprint $table) {
             $table->id();
+            $table->json('animalTypes');
+            $table->float('weight');
+            $table->float('length');
+            $table->float('height');
+            $table->string('gender');
+            $table->string('lifeStatus');
+            $table->dateTime('chippingDateTime');
+            $table->integer('chipperId')->unique();
+            $table->unsignedBigInteger('chippingLocationId');
+            $table->json('visitedLocations');
+            $table->dateTime('deathDateTime')->nullable();
             $table->timestamps();
         });
     }
