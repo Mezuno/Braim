@@ -30,17 +30,11 @@ class LocationController extends Controller
     {
         $post = json_decode($request->getContent(), true);
 
-//        $location = new Location();
-//        $location->latitude = $post['latitude'];
-//        $location->longitude = $post['longitude'];
-//        $location->save();
-
         $validated = [
             'latitude' => $post['latitude'],
             'longitude' => $post['longitude'],
         ];
 
-//        $validated = $request->validated();
         Location::insert($validated);
         $location = Location::where('latitude', '=', $post['latitude'])->where('longitude', '=', $post['longitude'])->first();
         $response = json_encode([

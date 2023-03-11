@@ -15,8 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('/locations')->group(function() {
-    Route::get('/{pointId}', [App\Http\Controllers\LocationController::class, 'view'])->where('accountId', '[0-9]+')->name('location.view');
-    Route::put('/{pointId}', [App\Http\Controllers\LocationController::class, 'update'])->where('accountId', '[0-9]+')->name('location.update');
-    Route::delete('/{pointId}', [App\Http\Controllers\LocationController::class, 'delete'])->where('accountId', '[0-9]+')->name('location.delete');
+    Route::get('/{pointId}', [App\Http\Controllers\LocationController::class, 'view'])->where('pointId', '[0-9]+')->name('location.view');
+    Route::put('/{pointId}', [App\Http\Controllers\LocationController::class, 'update'])->where('pointId', '[0-9]+')->name('location.update');
+    Route::delete('/{pointId}', [App\Http\Controllers\LocationController::class, 'delete'])->where('pointId', '[0-9]+')->name('location.delete');
     Route::post('/', [App\Http\Controllers\LocationController::class, 'store'])->name('location.store');
 });
