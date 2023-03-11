@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AnimalStoreRequest;
 use App\Http\Requests\LocationStoreRequest;
 use App\Http\Requests\LocationUpdateRequest;
 use App\Models\Location;

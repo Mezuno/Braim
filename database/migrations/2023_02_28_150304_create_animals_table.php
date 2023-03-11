@@ -18,11 +18,11 @@ return new class extends Migration
             $table->float('length');
             $table->float('height');
             $table->string('gender');
-            $table->string('lifeStatus');
-            $table->dateTime('chippingDateTime');
+            $table->string('lifeStatus')->default('ALIVE');
+            $table->dateTime('chippingDateTime')->default(now());
             $table->integer('chipperId')->unique();
             $table->unsignedBigInteger('chippingLocationId');
-            $table->json('visitedLocations');
+            $table->json('visitedLocations')->nullable();
             $table->dateTime('deathDateTime')->nullable();
             $table->timestamps();
         });

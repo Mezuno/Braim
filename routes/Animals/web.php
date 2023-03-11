@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('/animals')->group(function() {
-    Route::get('/{animalId}', [App\Http\Controllers\AnimalController::class, 'view'])->name('animal.view');
+    Route::get('/{animalId}', [App\Http\Controllers\AnimalController::class, 'view'])->where('animalId', '[0-9]+')->name('animal.view');
+    Route::post('/', [App\Http\Controllers\AnimalController::class, 'store'])->name('animal.store');
+    Route::put('/{animalId}', [App\Http\Controllers\AnimalController::class, 'update'])->where('animalId', '[0-9]+')->name('animal.update');
+    Route::delete('/{animalId}', [App\Http\Controllers\AnimalController::class, 'delete'])->where('animalId', '[0-9]+')->name('animal.delete');
     Route::get('/search', [App\Http\Controllers\AnimalController::class, 'search'])->name('animal.search');
-    Route::get('/{animalId}/locations', [App\Http\Controllers\AnimalController::class, 'locations'])->name('animal.locations');
+    Route::get('/{animalId}/locations', [App\Http\Controllers\AnimalController::class, 'locations'])->where('animalId', '[0-9]+')->name('animal.locations');
 
     Route::prefix('/types')->group(function() {
        Route::get('/{typeId}', [App\Http\Controllers\AnimalController::class, 'viewType'])->where('typeId', '[0-9]+')->name('animal.type.view');
