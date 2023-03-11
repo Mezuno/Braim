@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AnimalChangeTypeRequest;
 use App\Http\Requests\AnimalStoreRequest;
 use App\Http\Requests\AnimalTypeStoreRequest;
 use App\Http\Requests\AnimalTypeUpdateRequest;
 use App\Http\Requests\AnimalUpdateRequest;
+use App\Http\Requests\VisitedLocationChangeRequest;
 use App\Models\Animal;
 use App\Models\AnimalType;
+use App\Models\Location;
+use App\Models\VisitedLocation;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -193,6 +197,204 @@ class AnimalController extends Controller
 
 
         $animalType->delete();
+
+        return '';
+    }
+
+    public function addType(int $animalId, int $typeId)
+    {
+        $animal = Animal::findOrFail($animalId);
+
+        AnimalType::findOrFail($typeId);
+
+        $animalTypes = json_decode($animal->animalTypes);
+
+        if (in_array($typeId, $animalTypes)) {
+            return new Response('У животного id'. $animalId .' уже есть тип животного '. $typeId, 409);
+        }
+
+        array_push($animalTypes, $typeId);
+
+        $animal->animalTypes = json_encode($animalTypes, true);
+        $animal->save();
+
+        $response = json_encode([
+            'id' => $animal->id,
+            'animalTypes' => $animal->animalTypes,
+            'weight' => $animal->weight,
+            'length' => $animal->length,
+            'height' => $animal->height,
+            'gender' => $animal->gender,
+            'lifeStatus' => $animal->lifeStatus,
+            'chippingDateTime' => $animal->chippingDateTime,
+            'chipperId' => $animal->chipperId,
+            'chippingLocationId' => $animal->chippingLocationId,
+            'visitedLocations' => $animal->visitedLocations,
+            'deathDateTime' => $animal->deathDateTime,
+        ]);
+
+        return $response;
+    }
+
+    public function changeType(int $animalId, AnimalChangeTypeRequest $request)
+    {
+        $animal = Animal::findOrFail($animalId);
+
+        $post = json_decode($request->getContent(), true);
+
+        AnimalType::findOrFail($post['oldTypeId']);
+        AnimalType::findOrFail($post['newTypeId']);
+
+        $animalTypes = json_decode($animal->animalTypes);
+
+        if (!in_array($post['oldTypeId'], $animalTypes)) {
+            return new Response('У животного id'. $animalId .' нету типа животного '. $post['oldTypeId'], 404);
+        }
+        if (in_array($post['newTypeId'], $animalTypes)) {
+            if (in_array($post['oldTypeId'], $animalTypes)) {
+                return new Response('У животного id' . $animalId . ' уже есть тип животного ' . $post['newTypeId'] . ' и тип животного '. $post['oldTypeId'], 409);
+            }
+            return new Response('У животного id'. $animalId .' уже есть тип животного '. $post['newTypeId'], 409);
+        }
+
+        unset($animalTypes[array_search($post['oldTypeId'], $animalTypes)]);
+        array_push($animalTypes, $post['newTypeId']);
+        $animal->animalTypes = $animalTypes;
+        $animal->save();
+
+        $response = json_encode([
+            'id' => $animal->id,
+            'animalTypes' => $animal->animalTypes,
+            'weight' => $animal->weight,
+            'length' => $animal->length,
+            'height' => $animal->height,
+            'gender' => $animal->gender,
+            'lifeStatus' => $animal->lifeStatus,
+            'chippingDateTime' => $animal->chippingDateTime,
+            'chipperId' => $animal->chipperId,
+            'chippingLocationId' => $animal->chippingLocationId,
+            'visitedLocations' => $animal->visitedLocations,
+            'deathDateTime' => $animal->deathDateTime,
+        ]);
+
+        return $response;
+    }
+
+    public function removeType(int $animalId, int $typeId)
+    {
+        $animal = Animal::findOrFail($animalId);
+
+        AnimalType::findOrFail($typeId);
+
+        $animalTypes = json_decode($animal->animalTypes);
+
+        if (!in_array($typeId, $animalTypes)) {
+            return new Response('У животного id'. $animalId .' нету типа животного '. $typeId, 404);
+        }
+        if (count($animalTypes) == 1) {
+            return new Response('У животного id'. $animalId .' только один тип животного и это '. $typeId, 400);
+        }
+
+        unset($animalTypes[array_search($typeId, $animalTypes)]);
+
+        $animal->animalTypes = json_encode($animalTypes, true);
+        $animal->save();
+
+        $response = json_encode([
+            'id' => $animal->id,
+            'animalTypes' => $animal->animalTypes,
+            'weight' => $animal->weight,
+            'length' => $animal->length,
+            'height' => $animal->height,
+            'gender' => $animal->gender,
+            'lifeStatus' => $animal->lifeStatus,
+            'chippingDateTime' => $animal->chippingDateTime,
+            'chipperId' => $animal->chipperId,
+            'chippingLocationId' => $animal->chippingLocationId,
+            'visitedLocations' => $animal->visitedLocations,
+            'deathDateTime' => $animal->deathDateTime,
+        ]);
+
+        return $response;
+    }
+
+    public function addLocation(int $animalId, int $pointId)
+    {
+        $animal = Animal::findOrFail($animalId);
+        Location::findOrFail($pointId);
+
+        $visitedLocations = json_decode($animal->visitedLocations);
+
+        if ($animal->lifeStatus == 'DEAD') {
+            return new Response('Животное не может перемещаться, оно мертвое..', 400);
+        }
+        if (end($visitedLocations) == $pointId) {
+            return new Response('Животное находится в точке id'. $pointId .' на данный момент', 400);
+        }
+
+        array_push($visitedLocations, $pointId);
+        $animal->visitedLocations = json_encode($visitedLocations, true);
+        $animal->save();
+
+        VisitedLocation::insert([
+            'animalId' => $animalId,
+            'locationPointId' => $pointId,
+            'dateTimeOfVisitLocationPoint' => now()
+        ]);
+
+        $visitedLocation = VisitedLocation::where('animalId', '=', $animalId)->where('locationPointId', '=', $pointId)->first();
+
+        $response = json_encode([
+            'id' => $visitedLocation->id,
+            'dateTimeOfVisitLocationPoint' => $visitedLocation->dateTimeOfVisitLocationPoint,
+            'locationPointId' => $visitedLocation->locationPointId,
+        ], true);
+
+        return $response;
+    }
+    public function changeLocation(int $animalId, VisitedLocationChangeRequest $request)
+    {
+        $animal = Animal::findOrFail($animalId);
+
+        $post = json_decode($request->getContent(), true);
+
+        Location::findOrFail($post['locationPointId']);
+
+        $visitedLocation = VisitedLocation::findOrFail($post['visitedLocationPointId']);
+
+        $visitedLocation->locationPointId = $post['locationPointId'];
+        $visitedLocation->save();
+
+        $visitedLocations = json_decode($animal->visitedLocations);
+        $visitedLocations[count($visitedLocations)-1] = $post['locationPointId'];
+        $animal->visitedLocations = json_encode($visitedLocations, true);
+        $animal->save();
+
+        return json_encode([
+            'id' => $visitedLocation->id,
+            'dateTimeOfVisitLocationPoint' => $visitedLocation->dateTimeOfVisitLocationPoint,
+            'locationPointId' => $visitedLocation->locationPointId,
+        ], true);
+    }
+    public function removeLocation(int $animalId, int $visitedPointId)
+    {
+        $animal = Animal::findOrFail($animalId);
+        $visitedLocation = VisitedLocation::findOrFail($visitedPointId);
+
+        // Тип животного связан с животным - добавить проверку
+
+        if ($animalId == null or $animalId <= 0) {
+            return new Response('Животного с таким id не существует', 400);
+        }
+        if ($visitedPointId == null or $visitedPointId <= 0) {
+            return new Response('Объект с информацией о посещенной точке локации не существует', 400);
+        }
+        if ($visitedLocation->animalId != $animalId) {
+            return new Response('Объект с информацией о посещенной точке локации не относится к этому животному', 404);
+        }
+
+
+        $visitedLocation->delete();
 
         return '';
     }
