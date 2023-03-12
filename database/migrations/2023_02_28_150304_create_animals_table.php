@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -19,11 +20,13 @@ return new class extends Migration
             $table->float('height');
             $table->string('gender');
             $table->string('lifeStatus')->default('ALIVE');
-            $table->dateTime('chippingDateTime')->default(now());
-            $table->integer('chipperId')->unique();
+            $table->timestamp('chippingDateTime')->default(Carbon::now()->format('Y-m-d H:i:s'));
+            $table->foreignId('chipperId')
+                ->references('id')
+                ->on('users');
             $table->unsignedBigInteger('chippingLocationId');
             $table->json('visitedLocations')->nullable();
-            $table->dateTime('deathDateTime')->nullable();
+            $table->timestamp('deathDateTime')->nullable();
             $table->timestamps();
         });
     }

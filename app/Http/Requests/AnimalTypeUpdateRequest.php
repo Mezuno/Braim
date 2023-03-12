@@ -26,7 +26,6 @@ class AnimalTypeUpdateRequest extends FormRequest
     {
         return [
             'type' => [
-                'required',
                 Rule::unique('animal_types'),
             ],
         ];

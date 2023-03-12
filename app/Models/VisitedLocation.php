@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class VisitedLocation extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'dateTimeOfVisitLocationPoint' => 'datetime',
+    ];
 }

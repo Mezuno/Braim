@@ -15,8 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('/accounts')->group(function() {
-    Route::get('/{accountId}', [App\Http\Controllers\AccountController::class, 'view'])->where('accountId', '[0-9]+')->name('accounts.view');
     Route::get('/search', [App\Http\Controllers\AccountController::class, 'search'])->name('accounts.search');
-    Route::put('/{accountId}', [App\Http\Controllers\AccountController::class, 'update'])->where('accountId', '[0-9]+')->name('accounts.update');
-    Route::delete('/{accountId}', [App\Http\Controllers\AccountController::class, 'delete'])->where('accountId', '[0-9]+')->name('accounts.delete');
+
+    Route::get('/{accountId}', [App\Http\Controllers\AccountController::class, 'view'])->where('accountId', '[0-9-]+')->name('accounts.view');
+    Route::put('/{accountId}', [App\Http\Controllers\AccountController::class, 'update'])->where('accountId', '[0-9-]+')->name('accounts.update');
+    Route::delete('/{accountId}', [App\Http\Controllers\AccountController::class, 'delete'])->where('accountId', '[0-9-]+')->name('accounts.delete');
 });

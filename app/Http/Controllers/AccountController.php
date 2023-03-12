@@ -10,11 +10,9 @@ use Illuminate\Support\Facades\Hash;
 
 class AccountController extends Controller
 {
-    public function view(int $id)
+    public function view($id)
     {
-        // Дописать ошибку 401
-
-        if ($id <= 0) {
+        if ($id <= 0 or $id == null or !is_int((int)$id)) {
             return new Response('Неверный ID пользователя', 400);
         }
         $user = User::findOrFail($id);
@@ -54,7 +52,7 @@ class AccountController extends Controller
         return $users;
     }
 
-    public function update(int $id, UserUpdateRequest $request)
+    public function update($id, UserUpdateRequest $request)
     {
         // Непонятно что делать с авторизацией
 
@@ -64,7 +62,8 @@ class AccountController extends Controller
 //        if (auth()->id() != $id) {
 //            return new Response('Обновление не своего аккаунта 403', 403);
 //        }
-        if ($id <= 0 or $id === null) {
+
+        if ($id <= 0 or $id == null or !is_int((int)$id)) {
             return new Response('Пользователя с таким id не существует 400', 400);
         }
 
@@ -98,13 +97,14 @@ class AccountController extends Controller
         return $response;
     }
 
-    public function delete(int $id)
+    public function delete($id)
     {
-        $user = User::findOrFail($id);
-
-        if ($id <= 0 or $id === null) {
+        if ($id <= 0 or $id == null or !is_int((int)$id)) {
             return new Response('Пользователя с таким id не существует 400', 400);
         }
+
+        $user = User::findOrFail($id);
+
 
         // Аккаунт связан с животным - добавить проверку
 
@@ -114,9 +114,6 @@ class AccountController extends Controller
 
 //        if (!Auth::check()) {
 //            return new Response('Ошибка автризации 401', 401);
-//        }
-//        if (auth()->id() != $id) {
-//            return new Response('Обновление не своего аккаунта 403', 403);
 //        }
 
         $user->delete();

@@ -24,12 +24,12 @@ class LocationStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'latitude' => 'required|numeric',
-            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric|min:-90|max:90',
+            'longitude' => 'required|numeric|min:-180|max:180',
         ];
     }
 
     protected function failedValidation(Validator $validator) {
-        throw new HttpResponseException(response()->json($validator->errors(), 409));
+        throw new HttpResponseException(response()->json($validator->errors(), 400));
     }
 }

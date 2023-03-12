@@ -11,11 +11,9 @@ use Illuminate\Http\Response;
 
 class LocationController extends Controller
 {
-    public function view(int $id)
+    public function view($id)
     {
-        // Дописать ошибку 401
-
-        if ($id <= 0) {
+        if ($id <= 0 or $id == null or !is_int((int)$id)) {
             return new Response('Неверный ID расположения', 400);
         }
         $location = Location::findOrFail($id);
@@ -36,8 +34,12 @@ class LocationController extends Controller
             'longitude' => $post['longitude'],
         ];
 
+        if (Location::where('latitude', '=', $validated['latitude'])->where('longitude', '=', $validated['longitude'])->first()) {
+            return new Response('Точка локации с такими latitude и longitude уже существует', 409);
+        }
+
         Location::insert($validated);
-        $location = Location::where('latitude', '=', $post['latitude'])->where('longitude', '=', $post['longitude'])->first();
+        $location = Location::where('latitude', '=', $validated['latitude'])->where('longitude', '=', $validated['longitude'])->first();
         $response = json_encode([
             'id' => $location->id,
             'latitude' => $location->latitude,
@@ -46,24 +48,21 @@ class LocationController extends Controller
         return $response;
     }
 
-    public function update(int $id, LocationUpdateRequest $request)
+    public function update($id, LocationUpdateRequest $request)
     {
         // Непонятно что делать с авторизацией
 
 //        if (!Auth::check()) {
 //            return new Response('Ошибка автризации 401', 401);
 //        }
-//        if (auth()->id() != $id) {
-//            return new Response('Обновление не своего аккаунта 403', 403);
-//        }
 
-        if ($id <= 0 or $id === null) {
-            return new Response('Расположения с таким id не существует 400', 400);
+        if ($id <= 0 or $id == null or !is_int((int)$id)) {
+            return new Response('Точка локации с таким pointId не существует 400', 400);
         }
 
         $location = Location::find($id);
         if (!$location) {
-            return new Response('Расположение не найдено 403', 403);
+            return new Response('Точка лоакции с таким pointId не найдена 404', 404);
         }
 
         $post = json_decode($request->getContent(), true);
@@ -81,12 +80,15 @@ class LocationController extends Controller
         return $response;
     }
 
-    public function delete(int $id)
+    public function delete($id)
     {
-        $location = Location::findOrFail($id);
-
-        if ($id <= 0 or $id === null) {
+        if ($id <= 0 or $id == null or !is_int((int)$id)) {
             return new Response('Расположение с таким id не существует 400', 400);
+        }
+
+        $location = Location::find($id);
+        if (!$location) {
+            return new Response('Точка лоакции с таким pointId не найдена 404', 404);
         }
 
         // Расположение связано с животным - добавить проверку
@@ -97,9 +99,6 @@ class LocationController extends Controller
 
 //        if (!Auth::check()) {
 //            return new Response('Ошибка автризации 401', 401);
-//        }
-//        if (auth()->id() != $id) {
-//            return new Response('Обновление не своего аккаунта 403', 403);
 //        }
 
         $location->delete();

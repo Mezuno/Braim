@@ -8,4 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 class Animal extends Model
 {
     use HasFactory;
+
+    protected $casts = [
+        'chippingDateTime' => 'datetime',
+        'deathDateTime' => 'datetime',
+    ];
 }

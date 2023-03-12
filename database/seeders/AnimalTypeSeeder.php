@@ -19,7 +19,7 @@ class AnimalTypeSeeder extends Seeder
 
         for ($i = 0; $i < $recordCount; $i++) {
             $data[] = [
-                'type' => fake()->shuffleString,
+                'type' => fake()->firstName,
                 'created_at' => NOW(),
                 'updated_at' => NOW(),
             ];

@@ -19,8 +19,8 @@ class LocationSeeder extends Seeder
 
         for ($i = 0; $i < $recordCount; $i++) {
             $data[] = [
-                'latitude' => rand(1,10000),
-                'longitude' => rand(1,10000),
+                'latitude' => rand(-9000,9000) / 100,
+                'longitude' => rand(-18000,18000) / 100,
                 'created_at' => NOW(),
                 'updated_at' => NOW(),
             ];
